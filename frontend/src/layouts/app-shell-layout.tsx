@@ -85,9 +85,9 @@ export function AppShellLayout() {
           <Card className="flex h-full flex-col overflow-hidden bg-[linear-gradient(180deg,#111827,#1f2937)] p-0 text-white">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">{user?.fullName ?? 'Michael Moore'}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">{user?.fullName ?? 'Medical Service User'}</p>
                 <p className="mt-1 text-sm font-semibold text-white">{user?.division ?? 'Medis Roxwood'}</p>
-                <p className="mt-1 text-[11px] text-white/65">{user?.position ?? 'Kepala Unit'} · {user?.role ?? 'Admin'} · Batch 04</p>
+                <p className="mt-1 text-[11px] text-white/65">{user?.position ?? 'Kepala Unit'} / {user?.role ?? 'Admin'} / Batch 04</p>
                 <p className="mt-1 text-[11px] text-white/50">Lama bergabung 6 tahun</p>
               </div>
               <button

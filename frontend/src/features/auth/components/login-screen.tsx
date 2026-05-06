@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -12,7 +12,9 @@ import { Button } from '@/shared/ui/button';
 import { Card } from '@/shared/ui/card';
 import { showToast } from '@/shared/feedback/toast';
 import { env } from '@/lib/env';
+import { Modal } from '@/shared/ui/modal';
 import { useSessionStore } from '@/state/session-store';
+import type { LoginPayload } from '@/types/auth';
 
 const schema = z.object({
   fullName: z.string().min(3, 'Nama lengkap wajib diisi.'),
@@ -26,11 +28,12 @@ export function LoginScreen() {
   const navigate = useNavigate();
   const mutation = useLoginMutation();
   const setSession = useSessionStore((state) => state.setSession);
+  const [pendingForceLogin, setPendingForceLogin] = useState<LoginPayload | null>(null);
   const form = useForm<LoginSchema>({
     resolver: zodResolver(schema),
     defaultValues: {
-      fullName: 'Michael Moore',
-      pin: '1234',
+      fullName: '',
+      pin: '',
       loginUnit: 'roxwood',
     },
   });
@@ -39,9 +42,17 @@ export function LoginScreen() {
     document.title = 'Login | Medical Service';
   }, []);
 
-  async function onSubmit(values: LoginSchema) {
-    const response = await mutation.mutateAsync(values);
+  async function completeLogin(payload: LoginPayload) {
+    const response = await mutation.mutateAsync(payload);
+
     if (!response.success || !response.data) {
+      const shouldForceLogin = Boolean(response.errors?.force_login?.length) || response.message.toLowerCase().includes('device lain');
+
+      if (shouldForceLogin && !payload.forceLogin) {
+        setPendingForceLogin(payload);
+        return;
+      }
+
       showToast('error', response.message);
       return;
     }
@@ -49,6 +60,10 @@ export function LoginScreen() {
     setSession(response.data);
     showToast('success', response.message);
     navigate('/');
+  }
+
+  async function onSubmit(values: LoginSchema) {
+    await completeLogin(values);
   }
 
   const errors = form.formState.errors;
@@ -70,7 +85,12 @@ export function LoginScreen() {
           <Field label="Nama lengkap" required error={errors.fullName?.message}>
             <Input {...form.register('fullName')} />
           </Field>
-          <Field label="PIN demo" hint="Gunakan 1234 untuk mode demo." required error={errors.pin?.message}>
+          <Field
+            label={env.apiMode === 'api' ? 'PIN akun' : 'PIN demo'}
+            hint={env.apiMode === 'api' ? 'Gunakan PIN akun aktif dari database legacy.' : 'Gunakan 1234 untuk mode demo.'}
+            required
+            error={errors.pin?.message}
+          >
             <Input maxLength={4} inputMode="numeric" {...form.register('pin')} />
           </Field>
           <Field label="Unit" required error={errors.loginUnit?.message}>
@@ -87,6 +107,39 @@ export function LoginScreen() {
           </Button>
         </form>
       </Card>
+
+      <Modal
+        open={pendingForceLogin !== null}
+        title="Force Login"
+        subtitle="Akun ini masih aktif di device lain. Lanjutkan untuk menutup session lama dan masuk di device ini."
+        onClose={() => setPendingForceLogin(null)}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[var(--color-muted)]">
+            Flow ini mengikuti sistem legacy `ems2`. Jika Anda lanjut, token login lama akan dibersihkan.
+          </p>
+          <div className="flex items-center justify-end gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setPendingForceLogin(null)}>
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={async () => {
+                if (!pendingForceLogin) {
+                  return;
+                }
+
+                const payload = { ...pendingForceLogin, forceLogin: true };
+                setPendingForceLogin(null);
+                await completeLogin(payload);
+              }}
+            >
+              Lanjutkan
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

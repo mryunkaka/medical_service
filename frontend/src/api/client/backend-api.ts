@@ -32,6 +32,9 @@ export const backendApi = {
       ? httpClient.put<MedicalRecord>(`/api/medical-records/${recordId}`, values)
       : httpClient.post<MedicalRecord>('/api/medical-records', values);
   },
+  deleteMedicalRecord(recordId: number) {
+    return httpClient.delete<null>(`/api/medical-records/${recordId}`);
+  },
   getEmsServices(search = '', type = '') {
     return httpClient.get<EmsServiceRecord[]>('/api/ems-services', { search, type });
   },

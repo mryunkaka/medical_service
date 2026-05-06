@@ -43,6 +43,7 @@ export function DataTable<T>({ data, columns, search, onSearchChange, filters, m
   });
   const [draftDateRange, setDraftDateRange] = useState(() => getCurrentWeekRange());
   const [appliedDateRange, setAppliedDateRange] = useState(() => getCurrentWeekRange());
+  const [hasManualDateFilter, setHasManualDateFilter] = useState(false);
 
   const selectionColumn = useMemo<ColumnDef<T>>(
     () => ({
@@ -72,12 +73,16 @@ export function DataTable<T>({ data, columns, search, onSearchChange, filters, m
     () => data.filter((item) => isWithinDateRange(item, appliedDateRange.start, appliedDateRange.end)),
     [data, appliedDateRange.end, appliedDateRange.start],
   );
+  const effectiveData = useMemo(
+    () => (!hasManualDateFilter && filteredData.length === 0 && data.length > 0 ? data : filteredData),
+    [data, filteredData, hasManualDateFilter],
+  );
 
   const tableColumns = useMemo(() => [selectionColumn, ...columns], [columns, selectionColumn]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data: filteredData,
+    data: effectiveData,
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -104,7 +109,7 @@ export function DataTable<T>({ data, columns, search, onSearchChange, filters, m
       <div className="flex flex-col gap-2 rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--color-muted)]">
-            <span>Total {table.getRowModel().rows.length} data</span>
+            <span>Total {data.length} data</span>
             <Select
               value={String(table.getState().pagination.pageSize)}
               onChange={(event) => table.setPageSize(Number(event.target.value))}
@@ -147,7 +152,10 @@ export function DataTable<T>({ data, columns, search, onSearchChange, filters, m
               type="button"
               title="Terapkan filter"
               className="h-6 w-6 rounded-md"
-              onClick={() => setAppliedDateRange(draftDateRange)}
+              onClick={() => {
+                setAppliedDateRange(draftDateRange);
+                setHasManualDateFilter(true);
+              }}
             >
               <Check className="h-3 w-3" />
             </IconButton>
@@ -159,6 +167,7 @@ export function DataTable<T>({ data, columns, search, onSearchChange, filters, m
                 const nextRange = getCurrentWeekRange();
                 setDraftDateRange(nextRange);
                 setAppliedDateRange(nextRange);
+                setHasManualDateFilter(false);
               }}
             >
               <RotateCcw className="h-3 w-3" />

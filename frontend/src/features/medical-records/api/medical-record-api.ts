@@ -23,3 +23,9 @@ export function useMedicalRecordSaveMutation(recordId?: number) {
     mutationFn: (values: MedicalRecordFormValues) => appApi.saveMedicalRecord(values, recordId),
   });
 }
+
+export function useMedicalRecordDeleteMutation() {
+  return useMutation({
+    mutationFn: (recordId: number) => appApi.deleteMedicalRecord(recordId),
+  });
+}

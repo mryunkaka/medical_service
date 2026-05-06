@@ -5,8 +5,10 @@ import type { SessionUser } from '@/types/auth';
 interface SessionState {
   user: SessionUser | null;
   status: 'idle' | 'authenticated' | 'guest';
+  hasHydrated: boolean;
   setSession: (user: SessionUser | null) => void;
   clearSession: () => void;
+  setHasHydrated: (value: boolean) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -14,13 +16,20 @@ export const useSessionStore = create<SessionState>()(
     (set) => ({
       user: null,
       status: 'guest',
+      hasHydrated: false,
       setSession: (user) =>
         set({
           user,
           status: user ? 'authenticated' : 'guest',
         }),
       clearSession: () => set({ user: null, status: 'guest' }),
+      setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
-    { name: 'medical-service-session' },
+    {
+      name: 'medical-service-session',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
   ),
 );

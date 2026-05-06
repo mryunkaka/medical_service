@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { KeyRound, Save, ShieldCheck } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { MedicalRecordForm } from '@/features/medical-records/components/medical-record-form';
@@ -17,6 +17,7 @@ import { Card } from '@/shared/ui/card';
 import { Divider } from '@/shared/ui/divider';
 import { Drawer } from '@/shared/ui/drawer';
 import { MetricsGrid, PageAction } from '@/shared/ui/actions';
+import { useSessionStore } from '@/state/session-store';
 
 export function MedicalRecordsListPage() {
   return <MedicalRecordList />;
@@ -33,6 +34,11 @@ export function MedicalRecordEditPage() {
 
 export function AccountPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const user = useSessionStore((state) => state.user);
+  const initials = useMemo(() => {
+    const parts = (user?.fullName ?? 'MS').split(' ').filter(Boolean);
+    return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('');
+  }, [user?.fullName]);
 
   return (
     <div className="space-y-6">
@@ -43,21 +49,17 @@ export function AccountPage() {
         </PageAction>
       </div>
 
-      <Alert
-        title="Status frontend account settings masih memakai adapter lokal"
-        description="Struktur UI ini sengaja dibangun lebih dulu agar pola form, preference, dan access control dapat diuji sebelum endpoint Laravel adapter tersedia."
-        tone="warning"
-      />
-
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card className="space-y-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
-              <Avatar initials="MM" size="lg" />
+              <Avatar initials={initials} size="lg" />
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--color-accent)]">Profile</p>
-                <h2 className="mt-1 text-2xl font-black text-[var(--color-text)]">Michael Moore</h2>
-                <p className="mt-1 text-sm text-[var(--color-muted)]">Kepala Unit Roxwood · Admin operasional frontend mock</p>
+                <h2 className="mt-1 text-2xl font-black text-[var(--color-text)]">{user?.fullName ?? 'Medical Service User'}</h2>
+                <p className="mt-1 text-sm text-[var(--color-muted)]">
+                  {user?.position ?? 'Staff'} · {user?.division ?? 'Medical Service'} · {user?.role ?? 'User'}
+                </p>
               </div>
             </div>
             <Badge tone="success">Aktif</Badge>
@@ -67,18 +69,27 @@ export function AccountPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Nama lengkap" required>
-              <Input value="Michael Moore" readOnly />
+              <Input value={user?.fullName ?? ''} readOnly />
             </Field>
             <Field label="Email kerja">
-              <Input value="michael.moore@medicalservice.local" readOnly />
+              <Input value={buildWorkEmail(user?.fullName)} readOnly />
             </Field>
             <Field label="Unit operasional">
-              <Select value="roxwood" disabled>
-                <option value="roxwood">Roxwood</option>
+              <Select value={user?.unitCode ?? 'medical-service'} disabled>
+                <option value={user?.unitCode ?? 'medical-service'}>{user?.unitCode ?? 'medical-service'}</option>
               </Select>
             </Field>
+            <Field label="Divisi">
+              <Input value={user?.division ?? ''} readOnly />
+            </Field>
+            <Field label="Jabatan">
+              <Input value={user?.position ?? ''} readOnly />
+            </Field>
+            <Field label="Role">
+              <Input value={user?.role ?? ''} readOnly />
+            </Field>
             <Field label="Berlaku sejak">
-              <DateInput value="2026-05-04" readOnly />
+              <DateInput value={new Date().toISOString().slice(0, 10)} readOnly />
             </Field>
           </div>
         </Card>
@@ -94,7 +105,7 @@ export function AccountPage() {
               <label className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold text-[var(--color-text)]">Realtime notifikasi rekam medis</p>
-                  <p className="text-xs text-[var(--color-muted)]">Prioritas SSE, fallback polling sesuai PRD.</p>
+                  <p className="text-xs text-[var(--color-muted)]">Kirim pembaruan data dan invalidation event secara ringan.</p>
                 </div>
                 <Switch defaultChecked />
               </label>
@@ -131,13 +142,13 @@ export function AccountPage() {
             <Checkbox defaultChecked />
             <div>
               <p className="text-sm font-semibold text-[var(--color-text)]">Izinkan akses menu setting akun</p>
-              <p className="text-xs text-[var(--color-muted)]">Representasi UI awal untuk access control per modul.</p>
+              <p className="text-xs text-[var(--color-muted)]">Akses untuk meninjau profil, preferensi, dan hak akses personal.</p>
             </div>
           </label>
 
           <PageAction fullWidth onClick={() => undefined}>
             <Save className="h-4 w-4" />
-            Simpan preferensi mock
+            Simpan preferensi
           </PageAction>
         </Card>
       </div>
@@ -148,7 +159,7 @@ export function AccountPage() {
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--color-accent)]">Access Control UI</p>
             <h2 className="mt-1 text-xl font-black text-[var(--color-text)]">Matrix hak akses dasar</h2>
           </div>
-          <Badge tone="warning">Mock Role</Badge>
+          <Badge tone="warning">{user?.role ?? 'Role'}</Badge>
         </div>
         <MetricsGrid>
           {[
@@ -171,7 +182,7 @@ export function AccountPage() {
       <Drawer
         open={drawerOpen}
         title="Review Hak Akses"
-        subtitle="Drawer ini disiapkan sebagai pola reusable untuk panel samping admin."
+        subtitle="Panel samping untuk meninjau scope akses dari session aktif."
         onClose={() => setDrawerOpen(false)}
       >
         <div className="space-y-5">
@@ -183,14 +194,14 @@ export function AccountPage() {
             ]}
           />
           <Alert
-            title="Role aktif: Admin Operasional"
-            description="Mode mock ini meniru kebutuhan admin panel tanpa mengunci format policy backend lebih awal."
+            title={`Role aktif: ${user?.role ?? 'User'}`}
+            description="Panel ini menampilkan pola review hak akses untuk modul yang aktif pada session berjalan."
             tone="info"
           />
           {[
             ['Lihat dashboard', 'Ringkasan kartu dan quick action'],
             ['Kelola rekam medis', 'List, form, draft, upload, toast'],
-            ['Terima event realtime', 'SSE atau fallback polling'],
+            ['Terima event realtime', 'Event invalidation dan pembaruan status'],
           ].map(([title, description]) => (
             <div key={title} className="rounded-[24px] border border-[var(--color-border)] p-4">
               <div className="flex items-start justify-between gap-3">
@@ -210,4 +221,12 @@ export function AccountPage() {
       </Drawer>
     </div>
   );
+}
+
+function buildWorkEmail(fullName?: string) {
+  if (!fullName) {
+    return '';
+  }
+
+  return `${fullName.toLowerCase().trim().replace(/\s+/g, '.')}@medicalservice.local`;
 }

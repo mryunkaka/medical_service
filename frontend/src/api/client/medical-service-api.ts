@@ -15,6 +15,7 @@ export interface MedicalServiceApi {
   getMedicalRecords: (search?: string) => Promise<ApiResponse<MedicalRecord[]>>;
   getMedicalRecord: (id: number) => Promise<ApiResponse<MedicalRecord | null>>;
   saveMedicalRecord: (values: MedicalRecordFormValues, recordId?: number) => Promise<ApiResponse<MedicalRecord>>;
+  deleteMedicalRecord: (recordId: number) => Promise<ApiResponse<null>>;
   getEmsServices: (search?: string, type?: string) => Promise<ApiResponse<EmsServiceRecord[]>>;
   saveEmsService: (values: EmsServiceFormValues) => Promise<ApiResponse<EmsServiceRecord>>;
   getPharmacyRecap: (search?: string, status?: string) => Promise<ApiResponse<PharmacyRecapRecord[]>>;

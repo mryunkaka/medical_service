@@ -53,4 +53,7 @@ export const httpClient = {
   put<T>(path: string, body?: unknown) {
     return request<T>(path, { method: 'PUT', body: body ? JSON.stringify(body) : undefined });
   },
+  delete<T>(path: string) {
+    return request<T>(path, { method: 'DELETE' });
+  },
 };

@@ -12,74 +12,74 @@
 
 Checklist:
 
-- [ ] buat project Laravel 13
-- [ ] konfigurasi `.env`
-- [ ] koneksi database lama
-- [ ] konfigurasi logging
-- [ ] struktur route web/api
-- [ ] bootstrap auth dasar
+- [x] buat project Laravel 13
+- [x] konfigurasi `.env`
+- [x] koneksi database lama
+- [x] konfigurasi logging
+- [x] struktur route web/api
+- [x] bootstrap auth dasar
 
 ## 3. Phase 02 - Response Contract
 
 Checklist:
 
-- [ ] success response helper
-- [ ] error response helper
-- [ ] validation error response helper
-- [ ] pagination response helper
-- [ ] message convention
-- [ ] meta.toastType convention
+- [x] success response helper
+- [x] error response helper
+- [x] validation error response helper
+- [x] pagination response helper
+- [x] message convention
+- [x] meta.toastType convention
 
 ## 4. Phase 03 - Auth dan Authorization
 
 Checklist:
 
-- [ ] login endpoint
-- [ ] logout endpoint
-- [ ] current user endpoint
-- [ ] session check endpoint
-- [ ] role/division/position guard
-- [ ] unauthorized response pattern
+- [x] login endpoint
+- [x] logout endpoint
+- [x] current user endpoint
+- [x] session check endpoint
+- [x] role/division/position guard
+- [x] unauthorized response pattern
 
 ## 5. Phase 04 - Validation dan Service Layer
 
 Checklist:
 
-- [ ] form request pattern
-- [ ] service layer pattern
-- [ ] query/repository layer pattern
-- [ ] transaction helper
-- [ ] business rule exception pattern
+- [x] form request pattern
+- [x] service layer pattern
+- [x] query/repository layer pattern
+- [x] transaction helper
+- [x] business rule exception pattern
 
 ## 6. Phase 05 - Upload Foundation
 
 Checklist:
 
-- [ ] file validator
-- [ ] image validator
-- [ ] naming strategy
-- [ ] storage path strategy
-- [ ] file response contract
+- [x] file validator
+- [x] image validator
+- [x] naming strategy
+- [x] storage path strategy
+- [x] file response contract
 - [ ] fallback server-side compression jika perlu
 
 ## 7. Phase 06 - Realtime Foundation
 
 Checklist:
 
-- [ ] SSE stream endpoint
-- [ ] auth strategy untuk stream
-- [ ] heartbeat/keepalive
-- [ ] publisher service
-- [ ] delta endpoint untuk smart polling
-- [ ] event payload schema
+- [x] SSE stream endpoint
+- [x] auth strategy untuk stream
+- [x] heartbeat/keepalive
+- [x] publisher service
+- [x] delta endpoint untuk smart polling
+- [x] event payload schema
 
 ## 8. Phase 07 - Shared Lookup
 
 Checklist:
 
-- [ ] generic lookup option pattern
-- [ ] autocomplete pattern
-- [ ] filter source pattern
+- [x] generic lookup option pattern
+- [x] autocomplete pattern
+- [x] filter source pattern
 
 ## 9. Phase 08 - Modul Prioritas
 
@@ -93,17 +93,25 @@ Urutan:
 
 Checklist per modul:
 
-- [ ] audit query lama
-- [ ] audit field save
-- [ ] audit response kebutuhan frontend
-- [ ] buat list endpoint
-- [ ] buat detail endpoint
-- [ ] buat save endpoint
-- [ ] buat realtime event publish
+- [x] audit query lama
+- [x] audit field save
+- [x] audit response kebutuhan frontend
+- [x] buat list endpoint
+- [x] buat detail endpoint
+- [x] buat save endpoint
+- [x] buat realtime event publish
 
 ## 10. Definition of Done Backend
 
-- [ ] phase 01 sampai 07 selesai
-- [ ] minimal satu modul prioritas stabil
-- [ ] realtime dan fallback polling siap
-- [ ] lulus testing dasar
+- [x] phase 01 sampai 07 selesai
+- [x] minimal satu modul prioritas stabil
+- [x] realtime dan fallback polling siap
+- [x] lulus testing dasar
+
+## 11. Sisa Pekerjaan Nyata Setelah Bootstrap
+
+- [x] verifikasi koneksi MySQL legacy pada environment target lokal
+- [x] tambahkan endpoint account settings khusus selain session user
+- [ ] tambah feature test yang benar-benar memakai schema legacy
+- [ ] tambahkan compression / resize server-side bila shared hosting membutuhkan
+- [ ] sinkronkan upload frontend ke multipart bila mode API produksi diaktifkan penuh

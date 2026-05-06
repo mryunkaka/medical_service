@@ -416,6 +416,13 @@ export const mockApi = {
     return respond(payload, 'Rekam medis berhasil disimpan.', 'success');
   },
 
+  async deleteMedicalRecord(recordId: number) {
+    await delay();
+    const records = getRecords();
+    saveRecords(records.filter((record) => record.id !== recordId));
+    return respond(null, 'Rekam medis berhasil dihapus.', 'success');
+  },
+
   async getEmsServices(search = '', type = '') {
     await delay();
     const lower = search.trim().toLowerCase();

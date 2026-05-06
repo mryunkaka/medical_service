@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
-import { Eye, Pencil, Plus } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { createColumnHelper, type ColumnDef } from '@tanstack/react-table';
 import { queryClient } from '@/api/query/query-client';
-import { useMedicalRecordsQuery } from '@/features/medical-records/api/medical-record-api';
+import { useMedicalRecordDeleteMutation, useMedicalRecordsQuery } from '@/features/medical-records/api/medical-record-api';
 import { MedicalRecordForm } from '@/features/medical-records/components/medical-record-form';
 import { DataTable } from '@/shared/tables/data-table';
 import { Badge } from '@/shared/ui/badge';
@@ -11,6 +11,7 @@ import { Card } from '@/shared/ui/card';
 import { IconButton } from '@/shared/ui/icon-button';
 import { Modal } from '@/shared/ui/modal';
 import { EmptyState } from '@/shared/ui/empty-state';
+import { showToast } from '@/shared/feedback/toast';
 import { formatDateTime } from '@/lib/utils';
 import type { MedicalRecord } from '@/types/medical-record';
 
@@ -21,8 +22,22 @@ export function MedicalRecordList() {
   const [selected, setSelected] = useState<MedicalRecord | null>(null);
   const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const deleteMutation = useMedicalRecordDeleteMutation();
   const { data } = useMedicalRecordsQuery(search);
   const records = data?.data ?? [];
+
+  const removeRecords = useCallback(async (items: MedicalRecord[]) => {
+    for (const item of items) {
+      const response = await deleteMutation.mutateAsync(item.id);
+      if (!response.success) {
+        showToast('error', response.message);
+        return;
+      }
+    }
+
+    showToast('success', items.length > 1 ? 'Rekam medis terpilih berhasil dihapus.' : 'Rekam medis berhasil dihapus.');
+    void queryClient.invalidateQueries({ queryKey: ['medical-records'] });
+  }, [deleteMutation]);
 
   const columns = useMemo(
     () =>
@@ -64,11 +79,14 @@ export function MedicalRecordList() {
               <RowActionIcon title="Edit" onClick={() => setEditingRecordId(row.original.id)}>
                 <Pencil className="h-4 w-4" />
               </RowActionIcon>
+              <RowActionIcon title="Hapus" onClick={() => void removeRecords([row.original])}>
+                <Trash2 className="h-4 w-4" />
+              </RowActionIcon>
             </RowActions>
           ),
         }),
       ] as Array<ColumnDef<MedicalRecord, unknown>>,
-    [],
+    [removeRecords],
   );
 
   return (
@@ -90,7 +108,7 @@ export function MedicalRecordList() {
             columns={columns}
             search={search}
             onSearchChange={setSearch}
-            onBulkDelete={() => undefined}
+            onBulkDelete={(items) => void removeRecords(items)}
             primaryAction={(
               <IconButton type="button" title="Tambah rekam medis" className="h-6 w-6 rounded-md" onClick={() => setCreateOpen(true)}>
                 <Plus className="h-3 w-3" />

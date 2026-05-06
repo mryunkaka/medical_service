@@ -2,9 +2,17 @@ import { useEffect } from 'react';
 import { queryClient } from '@/api/query/query-client';
 import { realtimeClient } from '@/realtime/client/realtime-client';
 import { showToast } from '@/shared/feedback/toast';
+import { useSessionStore } from '@/state/session-store';
 
 export function useRealtimeBridge() {
+  const status = useSessionStore((state) => state.status);
+
   useEffect(() => {
+    if (status !== 'authenticated') {
+      realtimeClient.disconnect();
+      return;
+    }
+
     realtimeClient.connect();
 
     const unsubscribe = realtimeClient.subscribe((payload) => {
@@ -21,5 +29,5 @@ export function useRealtimeBridge() {
       unsubscribe();
       realtimeClient.disconnect();
     };
-  }, []);
+  }, [status]);
 }
