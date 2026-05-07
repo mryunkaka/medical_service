@@ -29,4 +29,10 @@ class LegacySchema
         return self::$columnCache[$key] = self::hasTable($table)
             && DB::connection()->getSchemaBuilder()->hasColumn($table, $column);
     }
+
+    public static function resetCache(): void
+    {
+        self::$columnCache = [];
+        self::$tableCache = [];
+    }
 }

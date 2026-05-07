@@ -7,6 +7,7 @@ export interface UploadAsset {
   fileUrl: string;
   fileSize: number;
   mimeType: string;
+  rawFile?: File;
 }
 
 export interface MedicalRecord {

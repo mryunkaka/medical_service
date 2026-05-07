@@ -20,14 +20,15 @@ function buildUrl(path: string, query?: Record<string, Primitive>) {
 }
 
 async function request<T>(path: string, init?: RequestInit, query?: Record<string, Primitive>) {
+  const resolvedInit = normalizeRequestInit(init);
   const response = await fetch(buildUrl(path, query), {
     credentials: 'include',
     headers: {
       Accept: 'application/json',
-      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-      ...init?.headers,
+      ...(resolvedInit.body && !(resolvedInit.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
+      ...resolvedInit.headers,
     },
-    ...init,
+    ...resolvedInit,
   });
 
   const payload = (await response.json()) as ApiResponse<T>;
@@ -48,12 +49,31 @@ export const httpClient = {
     return request<T>(path, { method: 'GET' }, query);
   },
   post<T>(path: string, body?: unknown) {
-    return request<T>(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined });
+    return request<T>(path, {
+      method: 'POST',
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    });
   },
   put<T>(path: string, body?: unknown) {
-    return request<T>(path, { method: 'PUT', body: body ? JSON.stringify(body) : undefined });
+    return request<T>(path, {
+      method: 'PUT',
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    });
   },
   delete<T>(path: string) {
     return request<T>(path, { method: 'DELETE' });
   },
 };
+
+function normalizeRequestInit(init?: RequestInit): RequestInit {
+  if (!init?.body || !(init.body instanceof FormData) || init.method !== 'PUT') {
+    return init ?? {};
+  }
+
+  init.body.set('_method', 'PUT');
+
+  return {
+    ...init,
+    method: 'POST',
+  };
+}

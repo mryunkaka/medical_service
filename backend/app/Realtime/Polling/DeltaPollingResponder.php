@@ -34,14 +34,7 @@ class DeltaPollingResponder
         return [
             'hasChanges' => true,
             'latestCursor' => (string) $latest['timestamp'],
-            'events' => [[
-                'event' => (string) $latest['event'],
-                'data' => $latest['data'] ?? null,
-                'meta' => [
-                    'toastType' => 'info',
-                    'invalidate' => [],
-                ],
-            ]],
+            'events' => [$latest],
         ];
     }
 }

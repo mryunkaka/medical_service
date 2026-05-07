@@ -37,6 +37,7 @@ export function useUploadField(options: UploadOptions = {}) {
         fileSize: compressed.size,
         mimeType: compressed.type,
         fileUrl: URL.createObjectURL(compressed),
+        rawFile: compressed,
       };
     } catch (caughtError) {
       const message = caughtError instanceof Error ? caughtError.message : 'Gagal memproses file upload.';

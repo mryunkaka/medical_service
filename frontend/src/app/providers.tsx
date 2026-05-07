@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { queryClient } from '@/api/query/query-client';
 import { useSessionQuery } from '@/features/auth/api/auth-api';
 import { useRealtimeBridge } from '@/realtime/handlers/use-realtime-bridge';
+import { showToast } from '@/shared/feedback/toast';
 import { useSessionStore } from '@/state/session-store';
 
 function RealtimeBootstrap() {
@@ -24,7 +25,14 @@ function SessionBootstrap() {
 
   useEffect(() => {
     function handleUnauthorized() {
+      const isLoginPage = window.location.pathname === '/login';
       clearSession();
+      queryClient.clear();
+
+      if (!isLoginPage) {
+        showToast('warning', 'Session berakhir. Silakan login kembali.');
+        window.location.replace('/login');
+      }
     }
 
     window.addEventListener('medical-service:unauthorized', handleUnauthorized);

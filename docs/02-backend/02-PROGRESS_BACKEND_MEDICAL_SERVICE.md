@@ -49,8 +49,9 @@ Status resmi backend. AI lain harus membaca file ini sebelum mengubah area backe
 ## 6. Blocker
 
 - tidak ada blocker teknis lokal untuk integrasi backend-frontend
-- upload backend saat ini menerima file nyata atau metadata asset frontend, tetapi kompresi server-side belum diaktifkan
-- test otomatis backend masih dasar, belum mencakup integrasi DB legacy nyata
+- upload backend sudah menerima file nyata multipart atau metadata asset frontend lama
+- kompresi / resize server-side aktif sebagai fallback shared hosting
+- test otomatis backend sekarang sudah mencakup feature test schema legacy untuk rekam medis dan secretary
 
 ## 7. Implementasi Nyata Saat Ini
 
@@ -94,9 +95,11 @@ Status resmi backend. AI lain harus membaca file ini sebelum mengubah area backe
 - `composer dump-autoload` lulus
 - `php artisan route:list` lulus
 - `php artisan test` lulus
+- `npm run test` frontend lulus untuk builder multipart
 - koneksi DB nyata tervalidasi pada database `farmasi_ems`
 - frontend `VITE_API_MODE=api` tervalidasi
 - login, list, add, edit, delete rekam medis tervalidasi end-to-end
+- upload multipart frontend-backend tervalidasi end-to-end
 - endpoint `secretary` tervalidasi setelah penyesuaian schema real
 
 ## 9. Aturan Update

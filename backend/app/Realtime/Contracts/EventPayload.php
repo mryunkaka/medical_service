@@ -4,12 +4,13 @@ namespace App\Realtime\Contracts;
 
 class EventPayload
 {
-    public static function make(string $event, mixed $data = null): array
+    public static function make(string $event, mixed $data = null, array $meta = []): array
     {
         return [
             'event' => $event,
             'timestamp' => now()->toIso8601String(),
             'data' => $data,
+            'meta' => $meta,
         ];
     }
 }

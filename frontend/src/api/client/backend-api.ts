@@ -1,4 +1,5 @@
 import { httpClient } from '@/api/client/http-client';
+import { buildMedicalRecordFormData } from '@/api/client/form-data';
 import type { MedicalServiceApi } from '@/api/client/medical-service-api';
 import { env } from '@/lib/env';
 import type { LoginPayload, SessionUser } from '@/types/auth';
@@ -28,9 +29,10 @@ export const backendApi = {
     return httpClient.get<MedicalRecord | null>(`/api/medical-records/${id}`);
   },
   saveMedicalRecord(values: MedicalRecordFormValues, recordId?: number) {
+    const payload = buildMedicalRecordFormData(values);
     return recordId
-      ? httpClient.put<MedicalRecord>(`/api/medical-records/${recordId}`, values)
-      : httpClient.post<MedicalRecord>('/api/medical-records', values);
+      ? httpClient.put<MedicalRecord>(`/api/medical-records/${recordId}`, payload)
+      : httpClient.post<MedicalRecord>('/api/medical-records', payload);
   },
   deleteMedicalRecord(recordId: number) {
     return httpClient.delete<null>(`/api/medical-records/${recordId}`);

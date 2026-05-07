@@ -206,6 +206,12 @@ class MedicalRecordService
             return null;
         }
 
+        $path = parse_url($url, PHP_URL_PATH);
+
+        if (is_string($path) && str_starts_with($path, '/storage/')) {
+            return ltrim($path, '/');
+        }
+
         return str_starts_with($url, '/storage/')
             ? ltrim($url, '/')
             : $url;

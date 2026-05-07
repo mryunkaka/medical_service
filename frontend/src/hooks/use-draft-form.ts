@@ -25,7 +25,7 @@ export function useDraftForm<T extends FieldValues>({ module, recordId, form }: 
       const envelope: DraftEnvelope<T> = {
         schemaVersion: DRAFT_SCHEMA_VERSION,
         updatedAt: new Date().toISOString(),
-        values: values as T,
+        values: sanitizeDraftValues(values) as T,
       };
       saveDraft(draftKey, envelope);
     });
@@ -37,4 +37,20 @@ export function useDraftForm<T extends FieldValues>({ module, recordId, form }: 
     draftKey,
     clearStoredDraft: () => clearDraft(draftKey),
   };
+}
+
+function sanitizeDraftValues<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeDraftValues(item)) as T;
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([key]) => key !== 'rawFile')
+        .map(([key, nestedValue]) => [key, sanitizeDraftValues(nestedValue)]),
+    ) as T;
+  }
+
+  return value;
 }

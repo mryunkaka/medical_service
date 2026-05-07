@@ -60,7 +60,7 @@ Checklist:
 - [x] naming strategy
 - [x] storage path strategy
 - [x] file response contract
-- [ ] fallback server-side compression jika perlu
+- [x] fallback server-side compression jika perlu
 
 ## 7. Phase 06 - Realtime Foundation
 
@@ -112,6 +112,6 @@ Checklist per modul:
 
 - [x] verifikasi koneksi MySQL legacy pada environment target lokal
 - [x] tambahkan endpoint account settings khusus selain session user
-- [ ] tambah feature test yang benar-benar memakai schema legacy
-- [ ] tambahkan compression / resize server-side bila shared hosting membutuhkan
-- [ ] sinkronkan upload frontend ke multipart bila mode API produksi diaktifkan penuh
+- [x] tambah feature test yang benar-benar memakai schema legacy
+- [x] tambahkan compression / resize server-side bila shared hosting membutuhkan
+- [x] sinkronkan upload frontend ke multipart bila mode API produksi diaktifkan penuh

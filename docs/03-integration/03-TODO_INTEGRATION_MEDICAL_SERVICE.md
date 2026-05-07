@@ -11,22 +11,22 @@
 
 Checklist:
 
-- [ ] success response
-- [ ] error response
-- [ ] validation error response
-- [ ] pagination response
-- [ ] toast message convention
-- [ ] meta.toastType convention
+- [x] success response
+- [x] error response
+- [x] validation error response
+- [x] pagination response
+- [x] toast message convention
+- [x] meta.toastType convention
 
 ## 3. Phase 02 - Auth Integration
 
 Checklist:
 
-- [ ] login request/response
-- [ ] logout flow
-- [ ] current user
-- [ ] session expired handling
-- [ ] unauthorized redirect/response
+- [x] login request/response
+- [x] logout flow
+- [x] current user
+- [x] session expired handling
+- [x] unauthorized redirect/response
 
 Acuan operasional:
 
@@ -36,19 +36,19 @@ Acuan operasional:
 
 Checklist:
 
-- [ ] option list
-- [ ] autocomplete
-- [ ] shared filter/search
+- [x] option list
+- [x] autocomplete
+- [x] shared filter/search
 
 ## 5. Phase 04 - Realtime Integration
 
 Checklist:
 
-- [ ] frontend SSE ke backend stream
-- [ ] smart polling fallback
-- [ ] query invalidation selektif
-- [ ] realtime toast jika relevan
-- [ ] delta update flow
+- [x] frontend SSE ke backend stream
+- [x] smart polling fallback
+- [x] query invalidation selektif
+- [x] realtime toast jika relevan
+- [x] delta update flow
 
 ## 6. Phase 05 - First Module Integration
 
@@ -58,12 +58,12 @@ Rekomendasi:
 
 Checklist:
 
-- [ ] mapping field frontend ke kolom lama
-- [ ] mapping validation
-- [ ] mapping upload
-- [ ] mapping save
-- [ ] mapping realtime event
-- [ ] uji gagal save tanpa kehilangan draft
+- [x] mapping field frontend ke kolom lama
+- [x] mapping validation
+- [x] mapping upload
+- [x] mapping save
+- [x] mapping realtime event
+- [x] uji gagal save tanpa kehilangan draft
 
 Acuan operasional:
 
@@ -71,6 +71,6 @@ Acuan operasional:
 
 ## 7. Definition of Done Integration
 
-- [ ] phase 01 sampai 04 selesai
-- [ ] satu modul pertama selesai
-- [ ] lulus testing dasar
+- [x] phase 01 sampai 04 selesai
+- [x] satu modul pertama selesai
+- [x] lulus testing dasar

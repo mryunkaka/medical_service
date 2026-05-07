@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Cache;
 
 class RealtimeEventPublisher
 {
-    public function publish(string $event, mixed $data = null): array
+    public function publish(string $event, mixed $data = null, array $meta = []): array
     {
-        $payload = EventPayload::make($event, $data);
+        $payload = EventPayload::make($event, $data, $meta);
         Cache::put($this->cacheKey(), $payload, now()->addMinutes(10));
 
         return $payload;

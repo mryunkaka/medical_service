@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
-import { appApi } from '@/api/client/app-api';
-import { useMedicalRecordDetailQuery, useMedicalRecordSaveMutation } from '@/features/medical-records/api/medical-record-api';
+import { useMedicalRecordDetailQuery, useMedicalRecordSaveMutation, useUserLookupQuery } from '@/features/medical-records/api/medical-record-api';
 import { medicalRecordSchema, type MedicalRecordSchema } from '@/features/medical-records/schema/medical-record-schema';
 import { useDraftForm } from '@/hooks/use-draft-form';
 import { useUploadField } from '@/hooks/use-upload-field';
+import { Autocomplete } from '@/shared/forms/autocomplete';
 import { Field, FieldSection } from '@/shared/forms/field';
 import { Input, Select, Textarea } from '@/shared/forms/controls';
 import { Uploader } from '@/shared/upload/uploader';
@@ -41,9 +41,11 @@ export function MedicalRecordForm({
   recordId?: number;
   onSuccess?: () => void;
 }) {
-  const [doctorOptions, setDoctorOptions] = useState<UserLookupItem[]>([]);
-  const [assistantOptions, setAssistantOptions] = useState<UserLookupItem[]>([]);
+  const [doctorSearch, setDoctorSearch] = useState('');
+  const [assistantSearch, setAssistantSearch] = useState('');
   const { data: detail } = useMedicalRecordDetailQuery(recordId ?? 0, Boolean(recordId));
+  const { data: doctorLookup } = useUserLookupQuery('doctor', doctorSearch);
+  const { data: assistantLookup } = useUserLookupQuery('assistant', assistantSearch);
   const saveMutation = useMedicalRecordSaveMutation(recordId);
   const ktpUpload = useUploadField();
   const mriUpload = useUploadField();
@@ -60,11 +62,6 @@ export function MedicalRecordForm({
   });
 
   useEffect(() => {
-    void appApi.getUserLookup('doctor').then((response) => setDoctorOptions(response.data ?? []));
-    void appApi.getUserLookup('assistant').then((response) => setAssistantOptions(response.data ?? []));
-  }, []);
-
-  useEffect(() => {
     if (detail?.data) {
       form.reset(detail.data);
     }
@@ -74,13 +71,13 @@ export function MedicalRecordForm({
     control: form.control,
     name: 'visibilityScope',
   });
-  const doctorId = useWatch({
+  const doctorName = useWatch({
     control: form.control,
-    name: 'doctorId',
+    name: 'doctorName',
   });
-  const assistantIds = useWatch({
+  const assistantNames = useWatch({
     control: form.control,
-    name: 'assistantIds',
+    name: 'assistantNames',
   });
   const ktpFile = useWatch({
     control: form.control,
@@ -91,6 +88,8 @@ export function MedicalRecordForm({
     name: 'mriFile',
   });
   const errors = form.formState.errors;
+  const doctorOptions = doctorLookup?.data ?? [];
+  const assistantOptions = assistantLookup?.data ?? [];
 
   async function onSubmit(values: MedicalRecordSchema) {
     const response = await saveMutation.mutateAsync(values);
@@ -150,38 +149,36 @@ export function MedicalRecordForm({
         <FieldSection title="Tim Medis" description="Lookup doctor dan assistant meniru flow select user legacy tanpa mengikat UI ke endpoint PHP lama.">
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Dokter DPJP" required error={errors.doctorId?.message ?? errors.doctorName?.message}>
-              <Select
-                value={String(doctorId || '')}
-                onChange={(event) => {
-                  const picked = doctorOptions.find((item) => item.value === event.target.value);
+              <Autocomplete
+                value={doctorName}
+                search={doctorSearch}
+                options={doctorOptions.map(mapLookupOption)}
+                placeholder="Cari dokter..."
+                emptyLabel="Dokter tidak ditemukan."
+                onSearchChange={setDoctorSearch}
+                onSelect={(option) => {
+                  const picked = doctorOptions.find((item) => item.value === option.value);
                   form.setValue('doctorId', Number(picked?.value ?? 0), { shouldValidate: true });
                   form.setValue('doctorName', picked?.label ?? '', { shouldValidate: true });
+                  setDoctorSearch(picked?.label ?? '');
                 }}
-              >
-                <option value="">Pilih dokter</option>
-                {doctorOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
+              />
             </Field>
             <Field label="Asisten" required error={errors.assistantIds?.message ?? errors.assistantNames?.message}>
-              <Select
-                value={String(assistantIds?.[0] ?? '')}
-                onChange={(event) => {
-                  const picked = assistantOptions.find((item) => item.value === event.target.value);
+              <Autocomplete
+                value={assistantNames?.[0] ?? ''}
+                search={assistantSearch}
+                options={assistantOptions.map(mapLookupOption)}
+                placeholder="Cari asisten..."
+                emptyLabel="Asisten tidak ditemukan."
+                onSearchChange={setAssistantSearch}
+                onSelect={(option) => {
+                  const picked = assistantOptions.find((item) => item.value === option.value);
                   form.setValue('assistantIds', picked ? [Number(picked.value)] : [], { shouldValidate: true });
                   form.setValue('assistantNames', picked ? [picked.label] : [], { shouldValidate: true });
+                  setAssistantSearch(picked?.label ?? '');
                 }}
-              >
-                <option value="">Pilih asisten</option>
-                {assistantOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
+              />
             </Field>
             <Field label="Jenis operasi" required error={errors.operasiType?.message}>
               <Select {...form.register('operasiType')}>
@@ -246,4 +243,12 @@ export function MedicalRecordForm({
       </form>
     </div>
   );
+}
+
+function mapLookupOption(option: UserLookupItem) {
+  return {
+    value: option.value,
+    label: option.label,
+    description: [option.meta.position, option.meta.division].filter(Boolean).join(' / '),
+  };
 }

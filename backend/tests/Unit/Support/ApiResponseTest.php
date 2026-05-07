@@ -9,10 +9,11 @@ class ApiResponseTest extends TestCase
 {
     public function test_event_payload_contains_standard_keys(): void
     {
-        $payload = EventPayload::make('medical-record.saved', ['id' => 99]);
+        $payload = EventPayload::make('medical-record.updated', ['recordId' => '99'], ['toastType' => 'success']);
 
-        $this->assertSame('medical-record.saved', $payload['event']);
-        $this->assertSame(['id' => 99], $payload['data']);
+        $this->assertSame('medical-record.updated', $payload['event']);
+        $this->assertSame(['recordId' => '99'], $payload['data']);
+        $this->assertSame(['toastType' => 'success'], $payload['meta']);
         $this->assertArrayHasKey('timestamp', $payload);
     }
 }

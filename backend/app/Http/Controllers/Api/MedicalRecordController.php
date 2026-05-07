@@ -47,7 +47,19 @@ class MedicalRecordController extends Controller
     {
         $user = LegacySession::user($request);
         $record = $this->transformRecord($this->service->store($request, $user));
-        $this->publisher->publish(EventNames::MEDICAL_RECORD_SAVED, ['id' => $record['id'] ?? null]);
+        $this->publisher->publish(
+            'medical-record.created',
+            [
+                'module' => 'medical-records',
+                'recordId' => (string) ($record['id'] ?? ''),
+                'action' => 'created',
+                'actorId' => (string) $user->id,
+            ],
+            [
+                'toastType' => 'success',
+                'invalidate' => ['dashboard', 'medical-records', 'medical-records:detail:'.($record['id'] ?? 0)],
+            ],
+        );
 
         return ApiResponse::success($record, 'Rekam medis berhasil disimpan.', ['toastType' => 'success'], 201);
     }
@@ -56,7 +68,19 @@ class MedicalRecordController extends Controller
     {
         $user = LegacySession::user($request);
         $record = $this->transformRecord($this->service->update($recordId, $request, $user));
-        $this->publisher->publish(EventNames::MEDICAL_RECORD_SAVED, ['id' => $recordId]);
+        $this->publisher->publish(
+            'medical-record.updated',
+            [
+                'module' => 'medical-records',
+                'recordId' => (string) $recordId,
+                'action' => 'updated',
+                'actorId' => (string) $user->id,
+            ],
+            [
+                'toastType' => 'success',
+                'invalidate' => ['dashboard', 'medical-records', 'medical-records:detail:'.$recordId],
+            ],
+        );
 
         return ApiResponse::success($record, 'Rekam medis berhasil diperbarui.', ['toastType' => 'success']);
     }
@@ -65,7 +89,19 @@ class MedicalRecordController extends Controller
     {
         $user = LegacySession::user($request);
         $this->service->destroy($recordId, $user);
-        $this->publisher->publish(EventNames::MEDICAL_RECORD_DELETED, ['id' => $recordId]);
+        $this->publisher->publish(
+            'medical-record.deleted',
+            [
+                'module' => 'medical-records',
+                'recordId' => (string) $recordId,
+                'action' => 'deleted',
+                'actorId' => (string) $user->id,
+            ],
+            [
+                'toastType' => 'success',
+                'invalidate' => ['dashboard', 'medical-records', 'medical-records:detail:'.$recordId],
+            ],
+        );
 
         return ApiResponse::success(null, 'Rekam medis berhasil dihapus.', ['toastType' => 'success']);
     }

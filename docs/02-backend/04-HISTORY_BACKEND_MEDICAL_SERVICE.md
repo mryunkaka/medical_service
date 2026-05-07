@@ -22,6 +22,39 @@ Histori resmi keputusan backend.
 - Status:
   - accepted
 - Context:
+  - masih ada tiga sisa pekerjaan backend sebelum integrasi bisa dianggap siap: feature test schema legacy, fallback compression server-side, dan sinkronisasi multipart upload frontend
+- Keputusan lama:
+  - backend sudah hidup pada DB nyata, tetapi upload produksi dan regression coverage belum ditutup
+- Keputusan baru:
+  - feature test backend dipindahkan ke schema legacy nyata pada jalur rekam medis dan secretary
+  - test DB otomatis fallback ke MySQL lokal jika `pdo_sqlite` tidak tersedia
+  - upload frontend mode API resmi memakai `FormData` multipart
+  - update multipart memakai `_method=PUT` agar aman di jalur PHP/Laravel shared hosting
+  - backend upload menambahkan resize/compression server-side berbasis GD bila tersedia
+- Alasan:
+  - memastikan jalur produksi upload dan test regresi sesuai kondisi server lokal yang nyata
+- Consequences:
+  - backend sekarang punya coverage lebih relevan terhadap tabel/kolom legacy
+  - frontend tidak lagi bergantung pada JSON-only untuk form yang punya file
+  - integrasi siap dinaikkan ke fase `03-integration`
+- File yang harus ikut diupdate:
+  - `backend/app/Uploads/Processors/ImageUploadService.php`
+  - `backend/app/Domain/MedicalRecords/Services/MedicalRecordService.php`
+  - `backend/app/Support/Legacy/LegacySchema.php`
+  - `backend/tests/Concerns/CreatesLegacySchema.php`
+  - `backend/tests/Feature/MedicalRecords/MedicalRecordApiLegacySchemaTest.php`
+  - `backend/tests/Feature/Secretary/SecretaryApiLegacySchemaTest.php`
+  - `frontend/src/api/client/form-data.ts`
+  - `frontend/src/api/client/http-client.ts`
+  - `frontend/src/api/client/backend-api.ts`
+  - `frontend/src/hooks/use-upload-field.ts`
+  - `frontend/src/hooks/use-draft-form.ts`
+  - `docs/02-backend/02-PROGRESS_BACKEND_MEDICAL_SERVICE.md`
+  - `docs/02-backend/03-TODO_BACKEND_MEDICAL_SERVICE.md`
+
+- Status:
+  - accepted
+- Context:
   - integrasi lokal sempat belum final karena frontend `apiMode=api` belum tervalidasi penuh pada DB nyata, endpoint `secretary` gagal pada schema real, dan account settings masih hidup dari mock payload
 - Keputusan lama:
   - validasi backend masih sebatas bootstrap, route, dan test dasar

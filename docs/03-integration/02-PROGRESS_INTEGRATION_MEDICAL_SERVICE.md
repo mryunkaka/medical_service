@@ -6,9 +6,9 @@ Status resmi integrasi frontend-backend.
 
 ## 2. Status Global
 
-- Status umum: in progress
-- Implementasi integrasi: mock adapter frontend sudah jalan
-- Prioritas aktif: mengganti adapter mock menjadi API backend nyata
+- Status umum: integration phase core completed
+- Implementasi integrasi: frontend dan backend nyata sudah terhubung dan tervalidasi pada local environment
+- Prioritas aktif: hardening lintas modul non-prioritas dan deploy handoff
 
 ## 3. Keputusan Final
 
@@ -35,15 +35,16 @@ Status resmi integrasi frontend-backend.
 
 ## 5. Blocker
 
-- backend adapter Laravel belum dibootstrap
-- endpoint SSE dan smart polling nyata belum tersedia
-- endpoint list/detail/save rekam medis nyata belum tersedia
+- tidak ada blocker teknis lokal untuk memulai phase integrasi resmi
 
 ## 6. Update 2026-05-06
 
-- frontend sekarang sudah punya adapter switch `mock`/`api` berbasis env
-- auth, dashboard, lookup user, rekam medis, dan delta polling sudah punya jalur client menuju endpoint backend baru
-- session bootstrap frontend sudah disiapkan agar sinkron dengan `GET /api/auth/session`
-- realtime frontend sudah punya konektor `SSE` dan fallback `smart polling` pada level client
-- EMS services, rekap farmasi, dan secretary juga sudah masuk ke jalur adapter frontend yang sama
-- integrasi end-to-end tetap belum selesai karena backend nyata belum ada di workspace
+- frontend sekarang punya adapter switch `mock`/`api` berbasis env dan mode `api` sudah dipakai pada validasi lokal
+- auth, dashboard, lookup user, rekam medis, EMS services, rekap farmasi, secretary, account settings, dan delta polling sudah punya jalur client menuju backend nyata
+- session bootstrap frontend sinkron dengan `GET /api/auth/session`
+- realtime frontend punya konektor `SSE` dan fallback `smart polling` pada level client
+- rekam medis sudah tervalidasi end-to-end untuk login, list, add, edit, delete
+- upload rekam medis multipart frontend-backend sudah tervalidasi end-to-end
+- autocomplete lookup dokter dan asisten sudah memakai query backend nyata
+- session expired handling sudah tervalidasi dengan redirect kembali ke login
+- delta realtime backend sudah membawa payload invalidation yang sesuai frontend

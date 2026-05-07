@@ -13,8 +13,10 @@ class RealtimeClient {
   private usingPolling = false;
   private reconnectTimeoutId: number | null = null;
   private visibilityBound = false;
+  private requestedDisconnect = false;
 
   connect() {
+    this.requestedDisconnect = false;
     this.bindVisibilityHandling();
 
     if (env.apiMode === 'api') {
@@ -26,6 +28,8 @@ class RealtimeClient {
   }
 
   disconnect() {
+    this.requestedDisconnect = true;
+
     if (this.heartbeatId !== null) {
       window.clearInterval(this.heartbeatId);
       this.heartbeatId = null;
@@ -86,6 +90,7 @@ class RealtimeClient {
     this.eventSource = new EventSource(streamUrl.toString(), { withCredentials: true });
     this.eventSource.onmessage = (event) => {
       const payload = JSON.parse(event.data) as RealtimeEventPayload;
+      this.latestCursor = new Date().toISOString();
       this.emit(payload);
     };
     this.eventSource.onerror = () => {
@@ -102,24 +107,18 @@ class RealtimeClient {
     }
 
     this.usingPolling = true;
+    void this.runPollingDelta();
     this.pollingId = window.setInterval(() => {
       if (document.visibilityState === 'hidden') {
         return;
       }
 
-      void appApi.getRealtimeDelta(this.latestCursor ?? undefined).then((response) => {
-        if (!response.success || !response.data) {
-          return;
-        }
-
-        this.latestCursor = response.data.latestCursor;
-        response.data.events.forEach((event) => this.emit(event));
-      });
+      void this.runPollingDelta();
     }, 15_000);
   }
 
   private scheduleReconnect() {
-    if (this.reconnectTimeoutId !== null || env.apiMode !== 'api') {
+    if (this.reconnectTimeoutId !== null || env.apiMode !== 'api' || this.requestedDisconnect) {
       return;
     }
 
@@ -144,15 +143,31 @@ class RealtimeClient {
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && env.apiMode === 'api') {
+      if (document.visibilityState === 'hidden') {
         this.stopPollingFallback();
-        if (!this.eventSource) {
+        return;
+      }
+
+      if (document.visibilityState === 'visible' && env.apiMode === 'api') {
+        if (!this.eventSource && !this.usingPolling) {
           this.connectApiMode();
+        } else if (this.usingPolling) {
+          void this.runPollingDelta();
         }
       }
     });
 
     this.visibilityBound = true;
+  }
+
+  private async runPollingDelta() {
+    const response = await appApi.getRealtimeDelta(this.latestCursor ?? undefined);
+    if (!response.success || !response.data) {
+      return;
+    }
+
+    this.latestCursor = response.data.latestCursor;
+    response.data.events.forEach((event) => this.emit(event));
   }
 }
 

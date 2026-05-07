@@ -29,3 +29,10 @@ export function useMedicalRecordDeleteMutation() {
     mutationFn: (recordId: number) => appApi.deleteMedicalRecord(recordId),
   });
 }
+
+export function useUserLookupQuery(scope: 'doctor' | 'assistant' | 'all', q: string) {
+  return useQuery({
+    queryKey: queryKeys.lookups(scope, q),
+    queryFn: () => appApi.getUserLookup(scope, q),
+  });
+}

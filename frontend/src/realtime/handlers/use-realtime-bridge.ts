@@ -20,9 +20,7 @@ export function useRealtimeBridge() {
         showToast(payload.meta.toastType, `Realtime: ${payload.data.action} ${payload.data.module}`);
       }
 
-      if (payload.data.module === 'medical-records') {
-        void queryClient.invalidateQueries({ queryKey: ['medical-records'] });
-      }
+      applyRealtimeInvalidation(payload.meta.invalidate);
     });
 
     return () => {
@@ -30,4 +28,18 @@ export function useRealtimeBridge() {
       realtimeClient.disconnect();
     };
   }, [status]);
+}
+
+function applyRealtimeInvalidation(keys?: string[]) {
+  if (!keys?.length) {
+    return;
+  }
+
+  keys.forEach((entry) => {
+    const queryKey = entry.split(':').filter(Boolean);
+
+    if (queryKey.length > 0) {
+      void queryClient.invalidateQueries({ queryKey });
+    }
+  });
 }

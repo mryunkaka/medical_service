@@ -17,9 +17,16 @@ class SseStreamResponder
     {
         return response()->stream(function () {
             $latest = $this->publisher->latest() ?? [
-                'event' => EventNames::HEARTBEAT,
+                'event' => 'notification.info',
                 'timestamp' => now()->toIso8601String(),
-                'data' => ['message' => 'heartbeat'],
+                'data' => [
+                    'module' => 'system',
+                    'action' => 'heartbeat',
+                ],
+                'meta' => [
+                    'toastType' => 'info',
+                    'invalidate' => [],
+                ],
             ];
 
             echo 'event: '.$latest['event'].PHP_EOL;
